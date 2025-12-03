@@ -1,0 +1,77 @@
+#! /bin/bash
+
+PROG_NAME=$(basename $0)
+
+usage()
+{
+    cat <<EOF
+Usage: ${PROG_NAME} [OPTION...]
+    -d, --debug                 use debug mode
+    -u, --unit-test             build unit test
+    -B, --build-dir=DIR         specify build directory     (default: "build")
+    -S, --source-dir=DIR        specify source directory    (default: ".")
+    -P, --parallel              specify complie parallel    (default: 10)
+    -T, --target=TAR            specify target              (default: "all")
+    -c, --complie               only compile code "cmake --build build_dir"
+    -h, --help                  display this help
+Example:
+    ${PROG_NAME}
+    ${PROG_NAME} -du --build-dir=out --source-dir=. --parallel=10 --target
+EOF
+}
+
+TEMP=$(getopt -o duB:S:P:T:ch --long debug,unit-test,build-dir:,source-dir:,parallel:,target:,compile,help -n "${PROG_NAME}" -- "$@")
+[ $? != 0 ] && { echo "Internal error!"; usage ; exit 1;}
+eval set -- ${TEMP}
+
+BUILD_TYPE=Release
+UNIT_TEST=OFF
+BUILD_DIR=build
+SOURCE_DIR=.
+PARALLEL=10
+TARGET=all
+COMPILE=false
+
+while true; do
+    case $1 in
+        -d| --debug)        BUILD_TYPE=Debug;   shift;;
+        -u| --unit-test)    UNIT_TEST=ON;       shift;;
+        -B| --build-dir)    BUILD_DIR=$2;       shift 2;;
+        -S| --source-dir)   SOURCE_DIR=$2;      shift 2;;
+        -T| --target)       TARGET=$2;          shift 2;;
+        -P| --parallel)     PARALLEL=$2;        shift 2;;
+        -T| --target)       TARGET=$2;          shift 2;;
+        -c| --compile)      COMPILE=true;       shift;;
+        -h| --help)         usage;              exit 0;;
+        --)                 shift; break;;
+        *)                  echo "Internal error!"; exit 1;;
+    esac
+done
+
+if ${COMPILE} ; then
+    cat <<EOF
+BUILD_DIR=${BUILD_DIR}
+PARALLEL=${PARALLEL}
+TARGET=${TARGET}
+EOF
+    echo "cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}"
+    echo "-----------------------------------------------------------"
+    cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}
+else
+    cat <<EOF
+BUILD_TYPE=${BUILD_TYPE}
+UNIT_TEST=${UNIT_TEST}
+BUILD_DIR=${BUILD_DIR}
+SOURCE_DIR=${SOURCE_DIR}
+PARALLEL=${PARALLEL}
+TARGET=${TARGET}
+EOF
+    if [ -d ${BUILD_DIR} ]; then
+        rm -rf ${BUILD_DIR}
+    fi
+    echo "cmake -B ${BUILD_DIR} -S ${SOURCE_DIR} -DUNIT_TEST=${UNIT_TEST} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+    echo "cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}"
+    echo "-----------------------------------------------------------"
+    cmake -B ${BUILD_DIR} -S ${SOURCE_DIR} -DUNIT_TEST=${UNIT_TEST} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}
+fi
