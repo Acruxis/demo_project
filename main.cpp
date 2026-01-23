@@ -29,6 +29,8 @@ void PrintLine(int nThread)
 
 int main()
 {
-    PrintLine(3);
+    // PrintLine(3);
+    int history_id = 102210;
+    cout << history_id << ", size_of int : " << sizeof(int) << endl;
     return 0;
 }
