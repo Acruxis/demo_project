@@ -1,0 +1,9 @@
+set showmode
+set showcmd
+set mouse=a
+set number
+set relativenumber
+set cursorline
+set autoindent
+set tabstop=4
+set shiftwidth=4
