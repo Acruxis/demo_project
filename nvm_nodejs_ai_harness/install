@@ -1,0 +1,13 @@
+# 下载并安装 nvm：
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+# 代替重启 shell
+\. "$HOME/.nvm/nvm.sh"
+# 下载并安装 Node.js：
+nvm install v24.18.1
+# 验证 Node.js 版本：
+node -v 
+# 验证 npm 版本：
+npm -v 
+
+npm install -g @anthropic-ai:claude-code
+# npm install -g @openai:codex

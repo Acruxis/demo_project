@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+Project(demo)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wpedantic")
+file(GLOB_RECURSE SRC "./src/*.cpp" "./src/*.c")
+include_directories("./src")
+add_executable(exec_thread main.cpp ${SRC})
+target_link_libraries(exec_thread pthread)

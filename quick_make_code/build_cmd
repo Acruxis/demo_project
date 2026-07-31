@@ -1,1 +1,0 @@
-g++ make_code.cpp -o mk -std=c++11

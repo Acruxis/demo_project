@@ -1,0 +1,88 @@
+#! /bin/bash
+
+PROG_NAME=$(basename $0)
+
+usage()
+{
+    cat <<EOF
+Usage: ${PROG_NAME} [OPTION...]
+    -d, --debug                 use debug mode (build directory: build/debug)
+    -u, --unit-test             build unit test
+    -r, --rebuild               remove build dir and reconfigure cmake
+    -B, --build-dir=DIR         specify build directory     (default: build/release or build/debug)
+    -S, --source-dir=DIR        specify source directory    (default: ".")
+    -P, --parallel              specify compile parallel    (default: 10)
+    -T, --target=TAR            specify target              (default: "all")
+    -c, --compile               only compile (default behavior, kept for compatibility)
+    -h, --help                  display this help
+Example:
+    ${PROG_NAME}                  # compile only (default)
+    ${PROG_NAME} -r               # rebuild from scratch
+    ${PROG_NAME} -d               # compile only, debug mode
+    ${PROG_NAME} -r -d            # rebuild in debug mode
+    ${PROG_NAME} -r -u -P 20      # rebuild with unit tests, 20 parallel jobs
+EOF
+}
+
+TEMP=$(getopt -o durB:S:P:T:ch --long debug,unit-test,rebuild,build-dir:,source-dir:,parallel:,target:,compile,help -n "${PROG_NAME}" -- "$@")
+[ $? != 0 ] && { echo "Internal error!"; usage ; exit 1;}
+eval set -- ${TEMP}
+
+BUILD_TYPE=Release
+UNIT_TEST=OFF
+BUILD_DIR=""
+SOURCE_DIR=.
+PARALLEL=10
+TARGET=all
+COMPILE=true
+REBUILD=false
+BUILD_DIR_EXPLICIT=false
+
+while true; do
+    case $1 in
+        -d| --debug)        BUILD_TYPE=Debug;   shift;;
+        -u| --unit-test)    UNIT_TEST=ON;       shift;;
+        -r| --rebuild)      REBUILD=true;       shift;;
+        -B| --build-dir)    BUILD_DIR=$2; BUILD_DIR_EXPLICIT=true; shift 2;;
+        -S| --source-dir)   SOURCE_DIR=$2;      shift 2;;
+        -T| --target)       TARGET=$2;          shift 2;;
+        -P| --parallel)     PARALLEL=$2;        shift 2;;
+        -c| --compile)      COMPILE=true;       shift;;
+        -h| --help)         usage;              exit 0;;
+        --)                 shift; break;;
+        *)                  echo "Internal error!"; exit 1;;
+    esac
+done
+
+# 如果用户未显式指定构建目录，则根据 BUILD_TYPE 自动推导
+if ! ${BUILD_DIR_EXPLICIT} ; then
+    BUILD_DIR="build/$(echo ${BUILD_TYPE} | tr '[:upper:]' '[:lower:]')"
+fi
+
+if ${REBUILD} ; then
+    cat <<EOF
+BUILD_TYPE=${BUILD_TYPE}
+UNIT_TEST=${UNIT_TEST}
+BUILD_DIR=${BUILD_DIR}
+SOURCE_DIR=${SOURCE_DIR}
+PARALLEL=${PARALLEL}
+TARGET=${TARGET}
+EOF
+    if [ -d ${BUILD_DIR} ]; then
+        rm -rf ${BUILD_DIR}
+    fi
+    echo "cmake -B ${BUILD_DIR} -S ${SOURCE_DIR} -DUNIT_TEST=${UNIT_TEST} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+    echo "cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}"
+    echo "-----------------------------------------------------------"
+    cmake -B ${BUILD_DIR} -S ${SOURCE_DIR} -DUNIT_TEST=${UNIT_TEST} -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+    cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}
+else
+    cat <<EOF
+BUILD_DIR=${BUILD_DIR}
+PARALLEL=${PARALLEL}
+TARGET=${TARGET}
+EOF
+    echo "cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}"
+    echo "-----------------------------------------------------------"
+    cmake --build ${BUILD_DIR} --target=${TARGET} --parallel=${PARALLEL}
+fi

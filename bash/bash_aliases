@@ -1,3 +1,8 @@
 alias cpl='cmake --build build --parallel=10'
 alias bld='cmake -B build && cmake --build build --parallel=10'
 alias rebld='rm -rf build && cmake -B build && cmake --build build --parallel=10'
+
+alias git_AM='git add . -A && git commit -m '
+
+alias vpn_port='export http_proxy="192.168.0.1:7890" && export https_proxy="192.168.0.1:7890"'
+alias unvpn_port='unset http_proxy && unset https_proxy'

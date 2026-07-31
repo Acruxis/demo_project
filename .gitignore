@@ -1,4 +1,5 @@
 .vscode
+# C++ 构建产物（build/mk/test 为裸名，匹配任意层级，如 cpp_demo/build、cpp_demo/quick_make_code/test）
 build
 out
 leak.log

@@ -1,0 +1,7 @@
+wsl --install <Distribution Nam> --location "/path/to/install"
+wsl --install --no-distribution
+wsl --update --pre-release
+wsl --distributionn <Distribution Name> --name <User Name> #start specified version
+wsl --list --online
+wsl --list --verbose
+wsl --shutdown
