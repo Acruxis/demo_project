@@ -2,6 +2,7 @@
 nestedVirtualization=true
 ipv6=true
 swapfile=\\windows\\path
+virtiofs=true
 
 [experimental]
 autoMemoryReclaim=gradual # gradual | dropcache | disabled
